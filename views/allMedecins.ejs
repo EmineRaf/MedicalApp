@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>allMedecins</title>
+    <link rel="stylesheet" href="/style.css">
+
+</head>
+<body>
+    <h1>ListeMedecins</h1>
+    <nav>
+      <ul>
+        <li><a href="/dashboard">Retour au tableau de bord</a></li>
+        <li><a href="/logout">Déconnexion</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <table>
+        <thead>
+          <tr>
+            <th>Docteur</th>
+            <th>specialité</th>
+            <th>Adresse</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% listeMed.forEach(med => { %>
+            <tr>
+              <td><%= med.nom %></td>
+              <td><%= med.specialite %></td>
+              <td><%= med.localisation %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </main>
+    <footer>
+        <p>&copy; 2025 Votre Application</p>
+      </footer>
+</body>
+</html>

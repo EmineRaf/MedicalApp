@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilisateurs</title>
+</head>
+<body>
+    <h2>Liste des utilisateurs</h2>
+    <a href="/signup">➕ Signup</a>
+    <a href="/signin">➕ login </a>
+    <ul>
+        <% users.forEach(user => { %>
+            <li>
+                <%= user.name %> - <%= user.email %>
+                <a href="/edit/<%= user.id %>">✏️ Modifier</a> |
+                <a href="/delete/<%= user.id %>" onclick="return confirm('Supprimer cet utilisateur ?')">🗑️ Supprimer</a>
+            </li>
+        <% }) %>
+    </ul>
+</body>
+</html>

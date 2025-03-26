@@ -1,0 +1,115 @@
+
+body {
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    color: #28539e;
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+}
+
+body::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("doctors.png");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    filter: blur(20px);
+    z-index: -1;
+}
+
+form{
+    width: 100%;
+    max-width: 400px;
+    min-width: 250px;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 1.5rem;
+    border: 2px solid #2AA8FF;
+    border-radius: 8px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+}
+
+h1, p {
+    margin: 1em auto;
+    text-align: center;
+}
+
+label {
+    display: block;
+    margin: 0.5rem 0;
+    font-weight: bold;
+    color: #1B3C74;
+}
+
+input,textarea,select {
+    margin: 10px 0 0 0;
+    width: 100%;
+    min-height: 1.8em;
+    padding: 0.5em;
+    border-radius: 4px;
+    border: 1px solid #2AA8FF;
+    font-size: 0.9rem;
+}
+
+input, textarea {
+    background-color: #ffffff;
+    color: #1B3C74;
+}
+
+input[type="submit"] {
+    display: block;
+    width: 50%;
+    margin: 1em auto;
+    height: 2em;
+    font-size: 0.9rem;
+    background-color: #1B3C74;
+    border-color: white;
+    color: white;
+    border-radius: 5px;
+    min-width: 250px;
+    cursor: pointer;
+}
+
+input[type="file"] {
+    padding: 1px 2px;
+}
+
+a{
+    color: #2AA8FF;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+label[for="remember-me"]{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.form-title{
+    text-align: center;
+    font-size: 1.5rem;
+    color: #1B3C74;
+    margin-bottom: 1rem;
+}
+.error-message {
+    color: red;
+    margin-top: 10px;
+    font-size: 14px;
+    padding: 10px;
+    background-color: #f8d7da;
+    border-radius: 5px;
+    border: 1px solid #f5c6cb;
+}  

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Rendez-vous</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>Mes Rendez-vous</h1>
+    <nav>
+      <ul>
+        <li><a href="/dashboard">Retour au tableau de bord</a></li>
+        <li><a href="/logout">Déconnexion</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <% if (appointments && appointments.length > 0) { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Docteur</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% appointments.forEach(appointment => { %>
+            <tr>
+              <td><%= appointment.date_RDV %></td>
+              <td><%= appointment.doctor_name %></td>
+              <td>
+                <a href="/appointments/cancel/<%= appointment.id_RDV %>">Annuler</a></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <p>Aucun rendez-vous à venir.</p>
+    <% } %>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Votre Application</p>
+  </footer>
+</body>
+</html>
