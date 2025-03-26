@@ -16,16 +16,6 @@ db.connect((err) => {
   else console.log("Connecté à MySQL !");
 });
 
-// 🔹 Afficher la liste des utilisateurs (Page d'accueil)
-/*
-router.get("/", (req, res) => {
-  const sql = "SELECT * FROM users";
-  db.query(sql, (err, results) => {
-    if (err) res.send("Erreur : " + err.message);
-    else res.render("index", { users: results });
-  });
-});
-*/
 router.get("/", (req, res) => {
     
     res.render("homepage");
@@ -180,10 +170,8 @@ router.get("/edit/:id", (req, res) => {
   });
 });
 
-// Route pour mettre à jour le patient
-// Route pour mettre à jour le patient
 router.post("/update/:id", async (req, res) => {
-  const { id } = req.params;  // Récupération de l'ID depuis l'URL
+  const { id } = req.params;  
   const { nom, prenom, email, tel, dateNaissance, taille, poids } = req.body;  // Récupération des données du formulaire
   const sql = "UPDATE patient SET nom = ?, prenom = ?, email = ?, num_tel = ?, date_naissance = ?, taille = ?, poids = ? WHERE id_patient = ?";
   
