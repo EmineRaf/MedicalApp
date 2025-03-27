@@ -54,7 +54,7 @@
                     <td class="specialite"><%= med.specialite %></td>
                     <td class="localisation"><%= med.localisation %></td>
                     <td class="email"><%= med.email %></td>
-                    <td><button class="rdvButton">Prendre un rendez-vous.</button></td>
+                    <td><a href="/prendreRdv/<%= user.id %>"><button class="rdvButton">Prendre un rendez-vous.</button></a></td>
                     
                 </tr>
                 <% }); %>

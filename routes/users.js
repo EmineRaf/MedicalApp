@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "root",
+  password: "",
   database: "gestion_patient",
 });
 
@@ -16,12 +16,72 @@ db.connect((err) => {
   else console.log("Connecté à MySQL !");
 });
 
+
 router.get("/", (req, res) => {
     
     res.render("homepage");
   });
 
+  function isAuthenticated(req, res, next) {
+    if (req.session.user) {
+      next(); // Si l'utilisateur est connecté, on continue
+    } else {
+      res.redirect("/signin"); // Sinon, on le renvoie vers la connexion
+    }
+  }
+  function isAuthenticatedAdmin(req, res, next) {
+    if (req.session.admin) {
+      next(); 
+    } else {
+      res.redirect("/adminLogin");
+    }
+  }
+  
+  router.get("/adminLogin", (req, res) => {
+    res.render("loginAdmin");
+  });
+  router.post("/adminLogin",(req,res)=>{
+    const { username, password } = req.body;
+  const sql = "SELECT * FROM admins WHERE username = ?";
 
+  db.query(sql, [username], async (err, results) => {
+    if (err) {
+      return res.render("loginAdmin", { error: "Erreur de la base de données.", username });
+    }
+
+    if (results.length === 0) {
+      return res.render("loginAdmin", { error: "❌ admin non trouvé !", username });
+    }
+
+    const admin = results[0];
+    const isMatch = password==admin.password;
+
+    if (isMatch) {
+      //Stocker les informations utilisateur en session
+      req.session.admin = {
+        id: admin.idadmin,
+        name: admin.nom,
+        username: admin.username,
+      };
+      
+
+      //Sauvegarde la session avant de rediriger
+      req.session.save(() => {
+        res.redirect("/dashboardAdmin");
+      });
+
+    } else {
+      res.render("loginAdmin", { error: "Mot de passe incorrect", username });
+    }
+  });
+});
+    
+router.get("/dashboardAdmin", isAuthenticatedAdmin, (req, res) => {
+  const adminId = req.session.admin.id;
+
+    // Passer les données de l'utilisateur et les rendez-vous à la vue
+    res.render("dashboardAdmin", {user: req.session.admin});
+  });
 // 🔹 Afficher le formulaire d'ajout
 router.get("/signup", (req, res) => {
   res.render("signup");
@@ -33,8 +93,8 @@ router.post("/signup", async (req, res) => {
     const { nom, prenom, email, tel, dateNaissance, genre, taille, poids, password } = req.body;
 
     // Vérifier si l'email ou le numéro de téléphone existe déjà
-    const sqlCheck = "SELECT * FROM patient WHERE email = ? OR num_tel = ?";
-    db.query(sqlCheck, [email, tel], async (err, results) => {
+    const check = "SELECT * FROM patient WHERE email = ? OR num_tel = ?";
+    db.query(check, [email, tel], async (err, results) => {
       if (err) {
         console.error("Erreur SQL (Vérification) :", err);
         return res.status(500).send("Erreur serveur");
@@ -48,10 +108,10 @@ router.post("/signup", async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Insérer le patient
-      const sqlInsert =
+      const insert =
         "INSERT INTO patient (num_tel, nom, prenom, email, date_naissance, genre, taille, poids, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
       db.query(
-        sqlInsert,
+        insert,
         [tel, nom, prenom, email, dateNaissance, genre, taille, poids, hashedPassword],
         (err, result) => {
           if (err) {
@@ -63,8 +123,6 @@ router.post("/signup", async (req, res) => {
           if (result.affectedRows === 0) {
             return res.status(500).send("Erreur lors de l'ajout du patient.");
           }
-
-          console.log("Utilisateur inséré avec ID :", result.insertId);
 
           // Récupérer l'utilisateur inséré avec son ID
           const sqlGetUser = "SELECT * FROM patient WHERE id_patient = ?";
@@ -99,12 +157,12 @@ router.post("/signup", async (req, res) => {
 
 
 
-// 🔹 Page de connexion (GET)
+// Page de connexion (GET)
 router.get("/signin", (req, res) => {
   res.render("signin");
 });
 
-// 🔹 Vérifier les informations de connexion (POST)
+// Page connexion (POST)
 router.post("/signin", (req, res) => {
   const { email, password } = req.body;
   const sql = "SELECT * FROM patient WHERE email = ?";
@@ -122,7 +180,7 @@ router.post("/signin", (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
-      // ✅ Stocker les informations utilisateur en session
+      //Stocker les informations utilisateur en session
       req.session.user = {
         id: user.id_patient,
         name: user.nom,
@@ -130,7 +188,7 @@ router.post("/signin", (req, res) => {
       };
       
 
-      // ✅ Sauvegarde la session avant de rediriger
+      //Sauvegarde la session avant de rediriger
       req.session.save(() => {
         res.redirect("/dashboard");
       });
@@ -141,12 +199,17 @@ router.post("/signin", (req, res) => {
   });
 });
 
+router.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) console.error(err);
+    res.redirect("/signin"); // Retourne à la page de connexion
+  });
+});
 
 
 
 
-
-// 🔹 Supprimer un utilisateur
+/*Supprimer un utilisateur
 router.get("/delete/:id", (req, res) => {
   const { id } = req.params;
   const sql = "DELETE FROM patient WHERE id_patient = ?";
@@ -155,9 +218,9 @@ router.get("/delete/:id", (req, res) => {
     else res.redirect("/");
   });
 });
+*/
 
-// 🔹 Afficher le formulaire de modification
-// Route pour afficher le formulaire de modification
+//afficher le formulaire de modification
 router.get("/edit/:id", (req, res) => {
   const { id } = req.params;
   const sql = "SELECT * FROM patient WHERE id_patient = ?";
@@ -175,7 +238,7 @@ router.post("/update/:id", async (req, res) => {
   const { nom, prenom, email, tel, dateNaissance, taille, poids } = req.body;  // Récupération des données du formulaire
   const sql = "UPDATE patient SET nom = ?, prenom = ?, email = ?, num_tel = ?, date_naissance = ?, taille = ?, poids = ? WHERE id_patient = ?";
   
-  db.query(sql, [nom, prenom, email, tel, dateNaissance, taille, poids, id], (err, result) => { // Ajout de `id` ici
+  db.query(sql, [nom, prenom, email, tel, dateNaissance, taille, poids, id], (err, result) => {
     if (err) {
       res.send("Erreur lors de la mise à jour : " + err.message);
     } else {
@@ -184,19 +247,6 @@ router.post("/update/:id", async (req, res) => {
   });
 });
 
-function isAuthenticated(req, res, next) {
-  if (req.session.user) {
-    next(); // Si l'utilisateur est connecté, on continue
-  } else {
-    res.redirect("/signin"); // Sinon, on le renvoie vers la connexion
-  }
-}
-router.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) console.error(err);
-    res.redirect("/signin"); // Retourne à la page de connexion
-  });
-});
 
 router.get("/dashboard", isAuthenticated, (req, res) => {
   const userId = req.session.user.id;
@@ -241,4 +291,9 @@ router.get("/allMedecins", (req, res) => {
       
   });
 });
+
+router.get("/prendreRdv/:id",(req,res)=>{
+  res.render("PageRDV");
+});
+
 module.exports = router;
