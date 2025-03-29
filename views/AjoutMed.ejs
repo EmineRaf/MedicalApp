@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter Medecin</title>
+    <link rel="stylesheet" href="ajout.css">
+
+</head>
+<body>
+     <!-- Main Content -->
+     <a href="/dashboardAdmin">
+        <button class="acceuilButton">Retour à l'acceuil</button>
+      </a>     <div class="flex-1 p-10">
+
+        <!-- Add Doctor Form -->
+        <div id="add-doctor-page" class="page">
+            <div class="form-container">
+                <h2>Ajouter un Nouveau Médecin</h2>
+                <form id="add-doctor-form" method="post" action="/AjoutMedecin">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="doctor-firstname">Prénom</label>
+                            <input type="text" id="doctor-firstname" required name="prenom">
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor-lastname">Nom</label>
+                            <input type="text" id="doctor-lastname" required name="nom">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctor-email">Email</label>
+                        <input type="email" id="doctor-email" required name="email">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="doctor-specialty">Spécialité</label>
+                            <select id="doctor-specialty" required name="specialite">
+                                <option value="">Sélectionner une spécialité</option>
+                                <option value="Cardiologie">Cardiologie</option>
+                                <option value="Dermatologie">Dermatologie</option>
+                                <option value="Pédiatrie">Pédiatrie</option>
+                                <option value="Neurologie">Neurologie</option>
+                                <option value="Chirurgie">Chirurgie</option>
+                                <option value="Gynécologie">Gynécologie</option>
+                                <option value="Ophtalmologie">Ophtalmologie</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor-phone">Téléphone</label>
+                            <input type="tel" id="doctor-phone" required name="tel">
+                        </div>
+                        <div class="form-group">
+                            <label for="doctor-Localisation">Localisation</label>
+                            <input type="text" id="doctor-Localisation" required name="localisation">
+                        </div>
+                       
+                        <div class="form-group">
+                            <label for="doctor-prix">Prix Viste</label>
+                            <input type="number" id="doctor-prix" required name="prix">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="doctor-password">Mot de passe</label>
+                            <input type="password" id="doctor-password" required name="password">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="doctor-description">Description</label>
+                        <textarea id="doctor-description" rows="3" name="description"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="reset" class="btn btn-secondary">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Enregistrer Médecin</button>
+                    </div>
+                </form>
+                <% if (typeof error !== 'undefined') { %>
+                    <div class="error-message">
+                      <%= error %>
+                    </div>
+                  <% } %>
+                  <% if (typeof success !== 'undefined' && success) { %>
+                    <div class="success-message">
+                      <%= success %>
+                    </div>
+                  <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+
+
+</body>
+</html>

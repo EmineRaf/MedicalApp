@@ -20,37 +20,7 @@
     </nav>
   </header>
 
-  <main>
-    <section>
-      <h2>Informations sur votre compte</h2>
-      <p>Email : <%= user.email %></p> <!-- Affiche l'email de l'utilisateur -->
-    </section>
 
-    <section>
-        <h2>Mes Rendez-vous</h2>
-        <% if (appointments && appointments.length > 0) { %>
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% appointments.forEach(appointment => { %>
-                <tr>
-                  <td><%= appointment.date_RDV %></td>
-                  <td><%= appointment.description%></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        <% } else { %>
-          <p>Vous n'avez pas de rendez-vous à venir.</p>
-        <% } %>
-      </section>
-      
-  </main>
 
   <footer>
     <p>&copy; 2025 Votre Application</p>

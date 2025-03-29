@@ -8,13 +8,13 @@
 </head>
 <body>
 <div>
-    <form id="rdvForm">
+    <form id="rdvForm" method="post" action="/prendreRdv/<%= med.id_medecin %>">
     <h1>Prendre un Rendez-vous</h1>
         <label for="date">Date :</label>
-        <input type="date" id="date" required>
+        <input type="date" id="date" required name="date">
 
         <label for="heure">Heure :</label>
-        <select id="heure" required>
+        <select id="heure" required name="heure">
             <option value="10:00">10:00</option>
             <option value="10:30">10:30</option>
             <option value="11:00">11:00</option>

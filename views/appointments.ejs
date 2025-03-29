@@ -130,6 +130,7 @@
                     row.style.display = (selectedLocation === "tous" || rowLocation === selectedLocation) ? "table-row" : "none";
                 });
             });
+
         </script>
         
         <div>
@@ -138,6 +139,7 @@
                   <thead>
                     <tr>
                       <th>Date</th>
+                      <th>Heure</th>
                       <th>Docteur</th>
                       <th>Actions</th>
                     </tr>
@@ -146,6 +148,7 @@
                     <% appointments.forEach(appointment => { %>
                       <tr>
                         <td><%= appointment.date_RDV %></td>
+                        <td><%= appointment.heure_debut %></td>
                         <td><%= appointment.doctor_name %></td>
                         <td>
                           <a href="/appointments/cancel/<%= appointment.id_RDV %>">Annuler</a></td>
@@ -156,7 +159,8 @@
                 <% } else { %>
                     <p>Aucun rendez-vous à venir.</p>
                   <% } %>
+                </div>
     </div>
-    </div>
+   
 </body>
 </html>
