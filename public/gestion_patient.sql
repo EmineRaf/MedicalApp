@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 26, 2025 at 05:52 PM
+-- Generation Time: Apr 14, 2025 at 09:43 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -58,12 +58,7 @@ CREATE TABLE `emploi_du_temps` (
 --
 
 INSERT INTO `emploi_du_temps` (`id_medecin`, `id_RDV`) VALUES
-(1, 1),
-(1, 2),
-(1, 3),
-(1, 4),
-(1, 10),
-(1, 11);
+(1, 13);
 
 -- --------------------------------------------------------
 
@@ -76,6 +71,7 @@ CREATE TABLE `medecin` (
   `nom` varchar(50) DEFAULT NULL,
   `prenom` varchar(50) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
+  `tel` int(8) NOT NULL,
   `specialite` varchar(100) DEFAULT NULL,
   `description` varchar(50) DEFAULT NULL,
   `password` varchar(255) NOT NULL,
@@ -87,8 +83,9 @@ CREATE TABLE `medecin` (
 -- Dumping data for table `medecin`
 --
 
-INSERT INTO `medecin` (`id_medecin`, `nom`, `prenom`, `email`, `specialite`, `description`, `password`, `prix_visite`, `localisation`) VALUES
-(1, 'Amel', 'Ghoul', 'Ghoul.amel@medecin.com', 'Ophtalmologue', 'Spécialiste en maladies cardiovasculaires', '0', 60, 'Bizerte');
+INSERT INTO `medecin` (`id_medecin`, `nom`, `prenom`, `email`, `tel`, `specialite`, `description`, `password`, `prix_visite`, `localisation`) VALUES
+(1, 'Amel', 'Ghoul', 'Ghoul.amel@medecin.com', 0, 'Ophtalmologue', 'Spécialiste en maladies cardiovasculaires', '0', 60, 'Bizerte'),
+(2, 'baklouti', 'mustapha', 'mustapha.baklouti@medecin.com', 72458263, 'Cardiologie', '', '$2b$10$3krR.rAdpqm/kTT4rgz7eOarJ2KzQ.DySL314SmSdHehkS8vNV9Sa', 60, 'Bizerte');
 
 -- --------------------------------------------------------
 
@@ -171,23 +168,19 @@ INSERT INTO `rapport` (`id_rapport`, `date_rapport`, `description`, `id_RDV`, `i
 
 CREATE TABLE `rdv` (
   `id_RDV` int(11) NOT NULL,
-  `date_RDV` datetime NOT NULL,
+  `date_RDV` date NOT NULL,
   `id_patient` int(11) NOT NULL,
   `id_medecin` int(11) NOT NULL,
-  `description` varchar(50) DEFAULT NULL
+  `description` varchar(50) DEFAULT NULL,
+  `heure_debut` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `rdv`
 --
 
-INSERT INTO `rdv` (`id_RDV`, `date_RDV`, `id_patient`, `id_medecin`, `description`) VALUES
-(1, '2025-03-10 10:00:00', 1, 1, 'Consultation de routine'),
-(2, '2025-03-11 10:00:00', 3, 1, 'etas du grippe tres severe'),
-(3, '2025-03-20 09:00:00', 1, 1, 'corana'),
-(10, '2025-03-21 00:17:47', 19, 1, NULL),
-(11, '2025-03-21 00:23:36', 19, 1, NULL),
-(4, '2025-03-21 09:00:00', 4, 1, 'corana');
+INSERT INTO `rdv` (`id_RDV`, `date_RDV`, `id_patient`, `id_medecin`, `description`, `heure_debut`) VALUES
+(13, '2025-05-03', 24, 1, NULL, '13:00:00');
 
 --
 -- Triggers `rdv`
@@ -222,6 +215,7 @@ ALTER TABLE `emploi_du_temps`
 --
 ALTER TABLE `medecin`
   ADD PRIMARY KEY (`id_medecin`),
+  ADD UNIQUE KEY `tel` (`tel`),
   ADD UNIQUE KEY `email` (`email`);
 
 --
@@ -269,7 +263,7 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `medecin`
 --
 ALTER TABLE `medecin`
-  MODIFY `id_medecin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_medecin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `ordonnance`
@@ -293,7 +287,7 @@ ALTER TABLE `rapport`
 -- AUTO_INCREMENT for table `rdv`
 --
 ALTER TABLE `rdv`
-  MODIFY `id_RDV` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_RDV` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
@@ -307,24 +301,17 @@ ALTER TABLE `emploi_du_temps`
   ADD CONSTRAINT `emploi_du_temps_ibfk_2` FOREIGN KEY (`id_RDV`) REFERENCES `rdv` (`id_RDV`) ON DELETE CASCADE;
 
 --
--- Constraints for table `ordonnance`
---
-ALTER TABLE `ordonnance`
-  ADD CONSTRAINT `ordonnance_ibfk_1` FOREIGN KEY (`id_rapport`) REFERENCES `rapport` (`id_rapport`) ON DELETE CASCADE;
-
---
 -- Constraints for table `rapport`
 --
 ALTER TABLE `rapport`
-  ADD CONSTRAINT `rapport_ibfk_1` FOREIGN KEY (`id_RDV`) REFERENCES `rdv` (`id_RDV`) ON DELETE CASCADE,
-  ADD CONSTRAINT `rapport_ibfk_2` FOREIGN KEY (`id_ordonnance`) REFERENCES `ordonnance` (`id_ordonnance`) ON DELETE CASCADE;
+  ADD CONSTRAINT `rapport_ibfk_1` FOREIGN KEY (`id_ordonnance`) REFERENCES `ordonnance` (`id_ordonnance`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `rdv`
 --
 ALTER TABLE `rdv`
-  ADD CONSTRAINT `rdv_ibfk_1` FOREIGN KEY (`id_patient`) REFERENCES `patient` (`id_patient`) ON DELETE CASCADE,
-  ADD CONSTRAINT `rdv_ibfk_2` FOREIGN KEY (`id_medecin`) REFERENCES `medecin` (`id_medecin`) ON DELETE CASCADE;
+  ADD CONSTRAINT `rdv_ibfk_1` FOREIGN KEY (`id_patient`) REFERENCES `patient` (`id_patient`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `rdv_ibfk_2` FOREIGN KEY (`id_medecin`) REFERENCES `medecin` (`id_medecin`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
