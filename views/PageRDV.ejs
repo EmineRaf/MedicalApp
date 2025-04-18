@@ -3,33 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rendez-vous</title>
-    <link rel="stylesheet" href="/styles2.css">
+    <title>Prendre Rendez-vous</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .time-slot {
+            display: inline-block;
+            margin: 5px;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .time-slot:hover {
+            background-color: #e9ecef;
+        }
+        .time-slot input[type="radio"]:checked + label {
+            background-color: #0d6efd;
+            color: white;
+        }
+        #loadingSlots {
+            display: none;
+        }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("doctors.png");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    filter: blur(10px); 
+    z-index: -1;
+}
+
+form {
+    background: rgba(255, 255, 255, 0.8); 
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 700px;
+    margin-bottom: 20px;
+}
+.acceuilButton{
+    display: inline-block;
+    background-color: #2AA8FF;
+    color: aliceblue;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 0px; 
+
+    margin-bottom: 150px; 
+    text-align: center;
+
+}
+
+.acceuilButton:hover{
+    background-color: #358ece;
+}
+    </style>
 </head>
 <body>
-<div>
-    <form id="rdvForm" method="post" action="/prendreRdv/<%= med.id_medecin %>">
-    <h1>Prendre un Rendez-vous</h1>
-        <label for="date">Date :</label>
-        <input type="date" id="date" required name="date">
+    <div class="container mt-4">
+        <a href="/allMedecins">
+            <button class="acceuilButton">Retour à l'acceuil</button>
+          </a>
+        <h2>Prendre Rendez-vous avec Dr. <%= med.prenom %> <%= med.nom %></h2>
+        <p>Spécialité: <%= med.specialite %></p>
 
-        <label for="heure">Heure :</label>
-        <select id="heure" required name="heure">
-            <option value="10:00">10:00</option>
-            <option value="10:30">10:30</option>
-            <option value="11:00">11:00</option>
-            <option value="11:30">11:30</option>
-            <option value="12:00">12:00</option>
-            <option value="12:30">12:30</option>
-            <option value="13:00">13:00</option>
-            <option value="13:30">13:30</option>
-            <option value="14:00">14:00</option>
-            <option value="14:30">14:30</option>
-            <option value="15:00">15:00</option>
-        </select>
+        <% if (error) { %>
+            <div class="alert alert-danger"><%= error %></div>
+        <% } %>
 
-        <button type="submit">Réserver</button>
-    </form>
-</div>
+        <% if (noSchedule) { %>
+            <div class="alert alert-warning">
+                Le médecin n'a pas de disponibilités pour ce jour.
+            </div>
+        <% } else { %>
+            <form id="appointmentForm" action="/prendreRdv/<%= med.id_medecin %>" method="POST">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="appointmentDate" class="form-label">Date du rendez-vous</label>
+                        <input type="date" class="form-control" id="appointmentDate" 
+                               name="date"
+                               min="<%= new Date().toISOString().split('T')[0] %>" 
+                               value="<%= selectedDate %>" required>
+                    </div>
+                </div>
+                
+                <div id="loadingSlots" class="mb-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    Chargement des créneaux disponibles...
+                </div>
+                
+<div id="timeSlotsContainer">
+    <% if (availableSlots && availableSlots.length > 0) { %>
+      <div class="mb-3">
+        <label class="form-label">Créneaux disponibles</label>
+        <div class="d-flex flex-wrap">
+          <% availableSlots.forEach(function(slot) { %>
+            <div class="time-slot m-2">
+              <input type="radio" id="time-<%= slot.time %>" 
+                     name="heure" value="<%= slot.time %>" required
+                     class="d-none">
+              <label for="time-<%= slot.time %>" class="btn btn-outline-primary">
+                <%= slot.displayTime %>
+              </label>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Confirmer</button>
+    <% } else if (!noSchedule) { %>
+      <div class="alert alert-info">Aucun créneau disponible</div>
+    <% } %>
+  </div>
+                </div>
+            </form>
+        <% } %>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#appointmentDate').change(function() {
+                const selectedDate = $(this).val();
+                const doctorId = '<%= med.id_medecin %>';
+                
+                $('#loadingSlots').show();
+                $('#timeSlotsContainer').html('');
+                
+                $.get(`/prendreRdv/${doctorId}/slots?date=${selectedDate}`, function(data) {
+                    $('#loadingSlots').hide();
+                    
+                    if (data.noSchedule) {
+                        $('#timeSlotsContainer').html(`
+                            <div class="alert alert-warning">
+                                Le médecin n'a pas de disponibilités pour ce jour.
+                            </div>
+                        `);
+                    } else if (data.availableSlots.length > 0) {
+                        let slotsHtml = `
+                            <div class="mb-3">
+                                <label class="form-label">Créneaux disponibles</label>
+                                <div>`;
+                        
+                        data.availableSlots.forEach(slot => {
+                            slotsHtml += `
+                                <div class="time-slot">
+                                    <input type="radio" id="time-${slot.time}" 
+                                           name="heure" value="${slot.time}" required>
+                                    <label for="time-${slot.time}">${slot.displayTime}</label>
+                                </div>`;
+                        });
+                        
+                        slotsHtml += `
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Confirmer le rendez-vous</button>`;
+                        
+                        $('#timeSlotsContainer').html(slotsHtml);
+                    } else {
+                        $('#timeSlotsContainer').html(`
+                            <div class="alert alert-info">
+                                Aucun créneau disponible pour cette date
+                            </div>
+                        `);
+                    }
+                }).fail(function() {
+                    $('#loadingSlots').hide();
+                    $('#timeSlotsContainer').html(`
+                        <div class="alert alert-danger">
+                            Erreur lors du chargement des créneaux
+                        </div>
+                    `);
+                });
+            });
+        });
+        
+
+
+
+    </script>
 </body>
 </html>

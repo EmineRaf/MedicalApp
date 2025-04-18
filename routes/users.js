@@ -15,198 +15,226 @@ db.connect((err) => {
   else console.log("Connecté à MySQL !");
 });
 
-
 router.get("/", (req, res) => {
-    
-    res.render("homepage");
-  });
+  res.render("homepage");
+});
 
-  function isAuthenticated(req, res, next) {
-    if (req.session.user) {
-      next(); // Si l'utilisateur est connecté, on continue
-    } else {
-      res.redirect("/signin"); // Sinon, on le renvoie vers la connexion
-    }
+function isAuthenticated(req, res, next) {
+  if (req.session.user) {
+    next();
+  } else {
+    res.redirect("/signin");
   }
-  function isAuthenticatedAdmin(req, res, next) {
-    if (req.session.admin) {
-      next(); 
-    } else {
-      res.redirect("/adminLogin");
-    }
+}
+
+function isAuthenticatedAdmin(req, res, next) {
+  if (req.session.admin) {
+    next(); 
+  } else {
+    res.redirect("/adminLogin");
   }
-  
-  router.get("/adminLogin", (req, res) => {
-    res.render("loginAdmin");
-  });
-  router.post("/adminLogin",(req,res)=>{
-    const { username, password } = req.body;
+}
+
+// Admin Login
+router.get("/adminLogin", (req, res) => {
+  res.render("loginAdmin", { error: null, username: "" });
+});
+
+router.post("/adminLogin", (req, res) => {
+  const { username, password } = req.body;
   const sql = "SELECT * FROM admins WHERE username = ?";
 
   db.query(sql, [username], async (err, results) => {
     if (err) {
-      return res.render("loginAdmin", { error: "Erreur de la base de données.", username });
+      return res.render("loginAdmin", { 
+        error: "Erreur de la base de données.", 
+        username 
+      });
     }
 
     if (results.length === 0) {
-      return res.render("loginAdmin", { error: "❌ admin non trouvé !", username });
+      return res.render("loginAdmin", { 
+        error: "❌ admin non trouvé !", 
+        username 
+      });
     }
 
     const admin = results[0];
-    const isMatch = password==admin.password;
+    const isMatch = password === admin.password;
 
     if (isMatch) {
-      //Stocker les informations utilisateur en session
       req.session.admin = {
         id: admin.idadmin,
         name: admin.nom,
         username: admin.username,
       };
       
-
-      //Sauvegarde la session avant de rediriger
       req.session.save(() => {
         res.redirect("/dashboardAdmin");
       });
-
     } else {
-      res.render("loginAdmin", { error: "Mot de passe incorrect", username });
+      res.render("loginAdmin", { 
+        error: "Mot de passe incorrect", 
+        username 
+      });
     }
   });
 });
-    
+
+// Admin Dashboard
 router.get("/dashboardAdmin", isAuthenticatedAdmin, (req, res) => {
-  const adminId = req.session.admin.id;
-  
   db.query("SELECT * FROM medecin", (err, medecins) => {
     if (err) {
       console.error("Erreur lors de la récupération des médecins:", err);
-      return res.status(500).send("Erreur serveur");
+      return res.render("dashboardAdmin", { 
+        admin: req.session.admin,
+        error: "Erreur lors de la récupération des médecins"
+      });
     }
 
-        db.query("SELECT * FROM patient", (err, patients) => {
+    db.query("SELECT * FROM patient", (err, patients) => {
       if (err) {
         console.error("Erreur lors de la récupération des patients:", err);
-        return res.status(500).send("Erreur serveur");
+        return res.render("dashboardAdmin", { 
+          admin: req.session.admin,
+          error: "Erreur lors de la récupération des patients"
+        });
       }
       
       res.render("dashboardAdmin", {
         admin: req.session.admin,
         listeMed: medecins,
-        listePatients: patients
+        listePatients: patients,
+        error: null
       });
     });
   });
 });
 
-// 🔹 Afficher le formulaire d'ajout
+// Patient Signup
 router.get("/signup", (req, res) => {
-  res.render("signup");
+  res.render("signup", { error: null, formData: null });
 });
 
-//Ajouter Patient
 router.post("/signup", async (req, res) => {
   try {
     const { nom, prenom, email, tel, dateNaissance, genre, taille, poids, password } = req.body;
     const check = "SELECT * FROM patient WHERE email = ? OR num_tel = ?";
+    
     db.query(check, [email, tel], async (err, results) => {
       if (err) {
         console.error("Erreur SQL (Vérification) :", err);
-        return res.status(500).send("Erreur serveur");
+        return res.render("signup", { 
+          error: "Erreur serveur", 
+          formData: req.body 
+        });
       }
 
       if (results.length > 0) {
-        return res.render("signup", { error: "L'email ou le numéro de téléphone existe déjà." ,formData: req.body});
+        return res.render("signup", { 
+          error: "L'email ou le numéro de téléphone existe déjà.",
+          formData: req.body
+        });
       }
+
       const hashedPassword = await bcrypt.hash(password, 10);
-
-      const insert =
-        "INSERT INTO patient (num_tel, nom, prenom, email, date_naissance, genre, taille, poids, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-      db.query(
-        insert,
-        [tel, nom, prenom, email, dateNaissance, genre, taille, poids, hashedPassword],
-        (err, result) => {
-          if (err) {
-            console.error("Erreur SQL (Insertion) :", err);
-            return res.status(500).send("Erreur serveur lors de l'inscription");
-          }
-
-          if (result.affectedRows === 0) {
-            return res.status(500).send("Erreur lors de l'ajout du patient.");
-          }
-
-          const sqlGetUser = "SELECT * FROM patient WHERE id_patient = ?";
-          db.query(sqlGetUser, [result.insertId], (err, users) => {
-            if (err || users.length === 0) {
-              console.error("Erreur lors de la récupération de l'utilisateur :", err);
-              return res.status(500).send("Erreur serveur");
-            }
-
-            const user = users[0];
-
-            req.session.user = {
-              id: user.id_patient,
-              name: user.nom,
-              email: user.email,
-            };
-
-            req.session.save(() => {
-              res.redirect("/dashboard");
-            });
+      const insert = "INSERT INTO patient (num_tel, nom, prenom, email, date_naissance, genre, taille, poids, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+      
+      db.query(insert, [tel, nom, prenom, email, dateNaissance, genre, taille, poids, hashedPassword], (err, result) => {
+        if (err) {
+          console.error("Erreur SQL (Insertion) :", err);
+          return res.render("signup", { 
+            error: "Erreur serveur lors de l'inscription",
+            formData: req.body
           });
         }
-      );
+
+        if (result.affectedRows === 0) {
+          return res.render("signup", { 
+            error: "Erreur lors de l'ajout du patient.",
+            formData: req.body
+          });
+        }
+
+        const sqlGetUser = "SELECT * FROM patient WHERE id_patient = ?";
+        db.query(sqlGetUser, [result.insertId], (err, users) => {
+          if (err || users.length === 0) {
+            console.error("Erreur lors de la récupération de l'utilisateur :", err);
+            return res.render("signup", { 
+              error: "Erreur lors de la création de la session",
+              formData: req.body
+            });
+          }
+
+          const user = users[0];
+          req.session.user = {
+            id: user.id_patient,
+            name: user.nom,
+            email: user.email,
+          };
+
+          req.session.save(() => {
+            res.redirect("/dashboard");
+          });
+        });
+      });
     });
   } catch (error) {
     console.error("Erreur (catch) :", error);
-    res.status(500).send("Erreur serveur");
+    res.render("signup", { 
+      error: "Erreur serveur",
+      formData: req.body
+    });
   }
 });
 
-
-
-// Page de connexion (GET)
+// Patient Signin
 router.get("/signin", (req, res) => {
-  res.render("signin");
+  res.render("signin", { error: null, email: "" });
 });
 
-// Page connexion (POST)
 router.post("/signin", (req, res) => {
   const { email, password } = req.body;
   const sql = "SELECT * FROM patient WHERE email = ?";
 
   db.query(sql, [email], async (err, results) => {
     if (err) {
-      return res.render("signin", { error: "Erreur de la base de données.", email });
+      return res.render("signin", { 
+        error: "Erreur de la base de données.", 
+        email 
+      });
     }
 
     if (results.length === 0) {
-      return res.render("signin", { error: "❌ Utilisateur non trouvé !", email });
+      return res.render("signin", { 
+        error: "❌ Utilisateur non trouvé !", 
+        email 
+      });
     }
 
     const user = results[0];
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch) {
-      //Stocker les informations utilisateur en session
       req.session.user = {
         id: user.id_patient,
         name: user.nom,
         email: user.email,
       };
       
-
-      //Sauvegarde la session avant de rediriger
       req.session.save(() => {
         res.redirect("/dashboard");
       });
-
     } else {
-      res.render("signin", { error: "Mot de passe incorrect", email });
+      res.render("signin", { 
+        error: "Mot de passe incorrect", 
+        email 
+      });
     }
   });
 });
 
+// Logout
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) console.error(err);
@@ -221,65 +249,68 @@ router.get("/logoutAdmin", (req, res) => {
   });
 });
 
-
-/*Supprimer un utilisateur
-router.get("/delete/:id", (req, res) => {
-  const { id } = req.params;
-  const sql = "DELETE FROM patient WHERE id_patient = ?";
-  db.query(sql, [id], (err, result) => {
-    if (err) res.send("Erreur lors de la suppression : " + err.message);
-    else res.redirect("/");
-  });
-});
-*/
-
-
-router.get("/edit/:id",isAuthenticated,(req, res) => {
+// Edit Patient Profile
+router.get("/edit/:id", isAuthenticated, (req, res) => {
   const { id } = req.params;
   const sql = "SELECT * FROM patient WHERE id_patient = ?";
+  
   db.query(sql, [id], (err, results) => {
     if (err) {
-      res.send("Erreur lors de la récupération des données : " + err.message);
-    } else {
-      res.render("edit", { user: results[0]});
+      return res.render("edit", { 
+        user: null, 
+        error: "Erreur lors de la récupération des données" 
+      });
     }
+    res.render("edit", { 
+      user: results[0],
+      error: null
+    });
   });
 });
 
-router.post("/update/:id",isAuthenticated,async (req, res) => {
+router.post("/update/:id", isAuthenticated, async (req, res) => {
   const { id } = req.params;  
-  const { nom, prenom, email, tel, dateNaissance, taille, poids } = req.body; 
+  const { nom, prenom, email, tel, dateNaissance, taille, poids } = req.body;
   const sql = "UPDATE patient SET nom = ?, prenom = ?, email = ?, num_tel = ?, date_naissance = ?, taille = ?, poids = ? WHERE id_patient = ?";
   
   db.query(sql, [nom, prenom, email, tel, dateNaissance, taille, poids, id], (err, result) => {
     if (err) {
-      res.send("Erreur lors de la mise à jour : " + err.message);
-    } else {
-      res.redirect("/dashboard"); 
+      return res.render("edit", { 
+        user: req.body, 
+        error: "Erreur lors de la mise à jour" 
+      });
     }
+    res.redirect("/dashboard"); 
   });
 });
 
-
+// Dashboard
 router.get("/dashboard", isAuthenticated, (req, res) => {
-  const userId = req.session.user.id
-    res.render("dashboard", {
-      user: req.session.user 
-    });
+  res.render("dashboard", {
+    user: req.session.user,
+    error: null
   });
+});
 
-
-router.get("/appointments",isAuthenticated,(req, res) => {
+// Appointments
+router.get("/appointments", isAuthenticated, (req, res) => {
   const userId = req.session.user.id;
   db.query("SELECT DATE_FORMAT(date_RDV, '%d %M %Y') AS date_RDV,nom as doctor_name,heure_debut ,id_RDV FROM rdv,medecin as m WHERE id_patient = ? and m.id_medecin=rdv.id_medecin", [userId], (err, results) => {
     if (err) {
-      res.send("Erreur: " + err.message);
-      res.redirect("/appointments");
+      return res.render("appointments", { 
+        appointments: [],
+        user: req.session.user,
+        error: "Erreur lors de la récupération des rendez-vous"
+      });
     }
-      res.render('appointments', { appointments: results,user: req.session.user}); 
-      
+    res.render('appointments', { 
+      appointments: results,
+      user: req.session.user,
+      error: null
+    }); 
   });
 });
+
 router.get("/appointments/cancel/:id", isAuthenticated, (req, res) => {
   const userId = req.session.user.id;
   const appointmentId = req.params.id;
@@ -289,13 +320,19 @@ router.get("/appointments/cancel/:id", isAuthenticated, (req, res) => {
     [userId, appointmentId],
     (err, results) => {
       if (err) {
-        res.send("Erreur : " + err.message);
-        return res.redirect("/appointments");
+        return res.render("appointments", { 
+          appointments: [],
+          user: req.session.user,
+          error: "Erreur lors de l'annulation du rendez-vous"
+        });
       }
       
       if (results.affectedRows === 0) {
-        res.send("Erreur  : " + err.message);
-        return res.redirect("/appointments");
+        return res.render("appointments", { 
+          appointments: [],
+          user: req.session.user,
+          error: "Rendez-vous non trouvé"
+        });
       }
 
       res.redirect("/appointments");
@@ -303,58 +340,289 @@ router.get("/appointments/cancel/:id", isAuthenticated, (req, res) => {
   );
 });
 
-
-/*router.get("/appointments/cancel/:id",isAuthenticated,(req, res) => {
-  const userId = req.session.user.id;
-  const appointmentId = req.params.id;
-  db.query("delete from rdv where id_patient=? and id_RDV=?", [userId,appointmentId], (err, results) => {
-    req.flash('success', 'Appointment canceled successfully!');
-    res.redirect("/appointments");
-  });
-});*/
-
-router.get("/allMedecins",isAuthenticated,(req, res) => {
-  //const userId = req.session.user.id;
+// Doctors List
+router.get("/allMedecins", isAuthenticated, (req, res) => {
   db.query("SELECT * FROM medecin ", (err, results) => {
-      if (err) throw err;
-      res.render('listemed', { listeMed: results,user: req.session.user });
-      
+    if (err) {
+      return res.render("listemed", { 
+        listeMed: [],
+        user: req.session.user,
+        error: "Erreur lors de la récupération des médecins"
+      });
+    }
+    res.render('listemed', { 
+      listeMed: results,
+      user: req.session.user,
+      error: null
+    });
   });
 });
 
-router.get("/prendreRdv/:id",isAuthenticated,(req, res) => {
-  const medecinId = req.params.id;
-  db.query("SELECT * FROM medecin WHERE id_medecin = ?", [medecinId], (err, results) => {
-      if (err) throw err;
-      if (results.length > 0) {
-          const med = results[0];
-          res.render("PageRDV", { med: med });
-      } else {
-          res.redirect("/allMedecins");
-      }
-  });
+// Utility functions
+const getDayOfWeek = (date) => {
+  const day = new Date(date).getDay();
+  return day === 0 ? 6 : day;
+};
+
+// Book Appointment
+router.get("/prendreRdv/:id", isAuthenticated, async (req, res) => {
+  try {
+    const medecinId = req.params.id;
+    const selectedDate = req.query.date || new Date().toISOString().split('T')[0];
+    const dayOfWeek = new Date(selectedDate).getDay();
+
+    // 1. Récupération du médecin
+    const medecin = await new Promise((resolve, reject) => {
+      db.query("SELECT * FROM medecin WHERE id_medecin = ?", [medecinId], (err, results) => {
+        if (err) return reject(err);
+        resolve(results[0]);
+      });
+    });
+
+    if (!medecin) {
+      return res.render("PageRDV", { 
+        error: "Médecin non trouvé",
+        noSchedule: true
+      });
+    }
+
+    // 2. Récupération du planning
+    const schedules = await new Promise((resolve, reject) => {
+      db.query(`
+        SELECT * FROM doctor_schedule 
+        WHERE id_medecin = ? 
+        AND day_of_week = ? 
+        AND is_active = 1
+      `, [medecinId, dayOfWeek], (err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      });
+    });
+
+
+    if (schedules.length === 0) {
+      return res.render("PageRDV", {
+        med: medecin,
+        selectedDate,
+        availableSlots: [],
+        noSchedule: true,
+        error: null
+      });
+    }
+
+    // 3. Récupération des RDV existants
+    const existingAppointments = await new Promise((resolve, reject) => {
+      db.query(`
+        SELECT heure_debut 
+        FROM rdv 
+        WHERE id_medecin = ? 
+        AND date_RDV = ?
+      `, [medecinId, selectedDate], (err, results) => {
+        if (err) return reject(err);
+        resolve(results.map(r => r.heure_debut));
+      });
+    });
+
+
+    // 4. Génération des créneaux disponibles
+    let availableSlots = [];
+    
+    for (const schedule of schedules) {
+      const slots = generateTimeSlots(
+        schedule.start_time,
+        schedule.end_time,
+        schedule.slot_duration,
+        existingAppointments,
+        selectedDate
+      );
+      availableSlots = [...availableSlots, ...slots];
+    }
+
+
+    res.render("PageRDV", {
+      med: medecin,
+      selectedDate,
+      availableSlots,
+      noSchedule: availableSlots.length === 0,
+      error: null
+    });
+
+  } catch (err) {
+    console.error("ERREUR:", err);
+    res.render("PageRDV", {
+      error: "Erreur technique",
+      noSchedule: true
+    });
+  }
 });
 
-router.post("/prendreRdv/:id",isAuthenticated,(req, res) => {
-  const medecinId = req.params.id; 
-  const { date, heure } = req.body;
+// Fonction pour générer les créneaux horaires
+function generateTimeSlots(startTime, endTime, duration, bookedSlots, selectedDate) {
+  const slots = [];
+  
+  // Convertir en objets Date pour faciliter les comparaisons
+  const start = new Date(`${selectedDate}T${startTime}`);
+  const end = new Date(`${selectedDate}T${endTime}`);
+  
+  let current = new Date(start);
+  
+  while (current < end) {
+    const timeString = current.toTimeString().substring(0, 8);
+    const isBooked = bookedSlots.includes(timeString);
+    
+    if (!isBooked) {
+      slots.push({
+        time: timeString,
+        displayTime: timeString.substring(0, 5) // Format HH:MM
+      });
+    }
+    
+    // Ajouter la durée du créneau
+    current.setMinutes(current.getMinutes() + duration);
+  }
+  
+  return slots;
+}
 
-  const userId = req.session.user.id;
+function formatTimeDisplay(timeString) {
+  if (!timeString) return '';
+  return timeString.toString().substring(0, 5); // Format HH:MM
+}
 
- const query = "INSERT INTO RDV (id_medecin, id_patient, date_RDV, heure_debut) VALUES (?, ?, ?, ?)";
-  const values = [medecinId, userId, date, heure];
+// AJAX endpoint for time slots
+router.get("/prendreRdv/:id/slots", isAuthenticated, async (req, res) => {
+  try {
+    const medecinId = req.params.id;
+    const selectedDate = req.query.date;
+    const dayOfWeek = getDayOfWeek(selectedDate);
+    
+    // Récupérer le planning du médecin
+    const schedule = await new Promise((resolve, reject) => {
+      db.query(`
+        SELECT * FROM doctor_schedule 
+        WHERE id_medecin = ? AND day_of_week = ? AND is_active = 1
+      `, [medecinId, dayOfWeek], (err, results) => {
+        if (err) reject(err);
+        resolve(results[0]);
+      });
+    });
 
-  db.query(query, values, (err, results) => {
-      if (err) {
-          console.error("Error inserting appointment:", err);
-          return res.status(500).send("Error booking appointment.");
-      }
-      res.redirect("/dashboard");
-  });
+    if (!schedule) {
+      return res.json({
+        success: true,
+        noSchedule: true,
+        message: "Le médecin n'a pas de disponibilités ce jour"
+      });
+    }
+
+    // Récupérer les RDV déjà pris
+    const existingAppointments = await new Promise((resolve, reject) => {
+      db.query(`
+        SELECT heure_debut 
+        FROM rdv 
+        WHERE id_medecin = ? AND date_RDV = ?
+      `, [medecinId, selectedDate], (err, results) => {
+        if (err) reject(err);
+        resolve(results.map(r => r.heure_debut));
+      });
+    });
+
+    // Générer les créneaux disponibles
+    const availableSlots = generateTimeSlots(
+      schedule.start_time,
+      schedule.end_time,
+      schedule.slot_duration,
+      existingAppointments,
+      selectedDate
+    );
+
+    res.json({
+      success: true,
+      noSchedule: false,
+      availableSlots,
+      message: availableSlots.length === 0 ? "Aucun créneau disponible" : ""
+    });
+
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur"
+    });
+  }
 });
-router.get("/AjoutMed",isAuthenticatedAdmin,(req, res) => {
-  res.render("AjoutMed");
+
+// Book Appointment POST
+router.post("/prendreRdv/:id", isAuthenticated, async (req, res) => {
+  try {
+    const medecinId = req.params.id;
+    const { date, heure } = req.body;
+    const userId = req.session.user.id;
+
+    // Vérifier si le créneau est toujours disponible
+    const checkQuery = `
+      SELECT COUNT(*) as count 
+      FROM rdv 
+      WHERE id_medecin = ? 
+      AND date_RDV = ? 
+      AND heure_debut = ?
+    `;
+    
+    const checkResult = await new Promise((resolve, reject) => {
+      db.query(checkQuery, [medecinId, date, heure], (err, results) => {
+        if (err) reject(err);
+        resolve(results[0].count > 0);
+      });
+    });
+
+    if (checkResult) {
+      const medecin = await new Promise((resolve, reject) => {
+        db.query("SELECT * FROM medecin WHERE id_medecin = ?", [medecinId], (err, results) => {
+          if (err) reject(err);
+          resolve(results[0]);
+        });
+      });
+
+      return res.render("PageRDV", {
+        med: medecin,
+        selectedDate: date,
+        error: "Ce créneau horaire est déjà réservé. Veuillez en choisir un autre.",
+        availableSlots: [],
+        noSchedule: false
+      });
+    }
+
+    // Insérer le nouveau RDV
+    const insertQuery = `
+      INSERT INTO rdv (id_medecin, id_patient, date_RDV, heure_debut) 
+      VALUES (?, ?, ?, ?)
+    `;
+    
+    await new Promise((resolve, reject) => {
+      db.query(insertQuery, [medecinId, userId, date, heure], (err, results) => {
+        if (err) reject(err);
+        resolve(results);
+      });
+    });
+
+    res.redirect("/appointments");
+
+  } catch (err) {
+    console.error("Erreur lors de la réservation :", err);
+    res.render("PageRDV", {
+      med: { id_medecin: req.params.id },
+      selectedDate: req.body.date,
+      error: "Une erreur est survenue lors de la réservation",
+      availableSlots: [],
+      noSchedule: false
+    });
+  }
 });
+// Add Doctor
+router.get("/AjoutMed", isAuthenticatedAdmin, (req, res) => {
+  res.render("AjoutMed", { error: null, success: null });
+});
+
 router.post("/AjoutMedecin", isAuthenticatedAdmin, async (req, res) => {
   const { prenom, nom, email, specialite, tel, localisation, prix, password, description } = req.body;
   
@@ -368,7 +636,10 @@ router.post("/AjoutMedecin", isAuthenticatedAdmin, async (req, res) => {
     });
 
     if (checkResults.length > 0) {
-      return res.render("AjoutMed", { error: "L'email ou le numéro de téléphone existe déjà." });
+      return res.render("AjoutMed", { 
+        error: "L'email ou le numéro de téléphone existe déjà.",
+        success: null
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -382,12 +653,22 @@ router.post("/AjoutMedecin", isAuthenticatedAdmin, async (req, res) => {
     });
 
     if (insertResults.affectedRows === 0) {
-      return res.status(500).render("AjoutMed", { error: "Erreur lors de l'ajout du médecin." });
+      return res.render("AjoutMed", { 
+        error: "Erreur lors de l'ajout du médecin.",
+        success: null
+      });
     }
-    return res.render("AjoutMed", { success: "Médecin créé avec succès!" });
+    return res.render("AjoutMed", { 
+      success: "Médecin créé avec succès!",
+      error: null
+    });
   } catch (err) {
     console.error("Erreur:", err);
-    return res.status(500).render("AjoutMed", { error: "Erreur serveur" });
+    return res.render("AjoutMed", { 
+      error: "Erreur serveur",
+      success: null
+    });
   }
 });
+
 module.exports = router;

@@ -17,7 +17,7 @@
             <label for="last-name">Last Name: <input id="last-name" name="prenom" type="text" value="<%= user.prenom %>"  /></label><br>
             <label for="email">Email: <input id="email" name="email" type="email" value="<%= user.email %>" /></label><br>
             <label for="phone-number">phone number: <input id="phone-number" name="tel" type="tel"  value="<%= user.num_tel %>"/></label><br>
-            <label for="date-of-birth">Date of Birth: <input id="date-of-birth" name="dateNaissance" type="date" value="<%= user.date_naissance %>"><br>
+            <label for="date-of-birth">Date of Birth: <input id="date-of-birth" name="dateNaissance" type="date" value="<%= user.date_naissance %>" required><br>
             <label for="Taille">Taille en Cm <input id="taille" name="taille" type="number" step="any"value="<%= user.taille %>" /></label><br>
             <label for="Poids">Poids en Kg <input id="poids" name="poids" type="number" step="any"value="<%= user.poids %>" /></label><br>
                 <input type="submit" value="Modifier">

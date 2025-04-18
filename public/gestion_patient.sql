@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Apr 14, 2025 at 09:43 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Hôte : 127.0.0.1
+-- Généré le : ven. 18 avr. 2025 à 23:24
+-- Version du serveur : 10.4.32-MariaDB
+-- Version de PHP : 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `gestion_patient`
+-- Base de données : `gestion_patient`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `admins`
+-- Structure de la table `admins`
 --
 
 CREATE TABLE `admins` (
@@ -36,7 +36,7 @@ CREATE TABLE `admins` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `admins`
+-- Déchargement des données de la table `admins`
 --
 
 INSERT INTO `admins` (`idadmin`, `username`, `password`, `nom`, `prenom`) VALUES
@@ -45,7 +45,39 @@ INSERT INTO `admins` (`idadmin`, `username`, `password`, `nom`, `prenom`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `emploi_du_temps`
+-- Structure de la table `doctor_schedule`
+--
+
+CREATE TABLE `doctor_schedule` (
+  `id_schedule` int(11) NOT NULL,
+  `id_medecin` int(11) NOT NULL,
+  `day_of_week` tinyint(1) NOT NULL COMMENT '0=Sunday, 1=Monday, ..., 6=Saturday',
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `slot_duration` int(11) NOT NULL DEFAULT 30 COMMENT 'in minutes',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `doctor_schedule`
+--
+
+INSERT INTO `doctor_schedule` (`id_schedule`, `id_medecin`, `day_of_week`, `start_time`, `end_time`, `slot_duration`, `is_active`) VALUES
+(1, 1, 1, '09:00:00', '14:00:00', 30, 1),
+(2, 1, 2, '09:00:00', '13:00:00', 30, 1),
+(3, 1, 3, '09:00:00', '14:00:00', 30, 1),
+(4, 1, 4, '09:00:00', '12:00:00', 30, 1),
+(5, 1, 5, '09:00:00', '14:00:00', 30, 1),
+(17, 2, 1, '10:00:00', '15:00:00', 30, 1),
+(18, 2, 2, '08:00:00', '12:00:00', 30, 1),
+(19, 2, 3, '10:00:00', '13:00:00', 30, 1),
+(20, 2, 4, '09:00:00', '11:00:00', 30, 1),
+(21, 2, 5, '10:00:00', '15:00:00', 30, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `emploi_du_temps`
 --
 
 CREATE TABLE `emploi_du_temps` (
@@ -54,16 +86,16 @@ CREATE TABLE `emploi_du_temps` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `emploi_du_temps`
+-- Déchargement des données de la table `emploi_du_temps`
 --
 
 INSERT INTO `emploi_du_temps` (`id_medecin`, `id_RDV`) VALUES
-(1, 13);
+(1, 32);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `medecin`
+-- Structure de la table `medecin`
 --
 
 CREATE TABLE `medecin` (
@@ -80,7 +112,7 @@ CREATE TABLE `medecin` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `medecin`
+-- Déchargement des données de la table `medecin`
 --
 
 INSERT INTO `medecin` (`id_medecin`, `nom`, `prenom`, `email`, `tel`, `specialite`, `description`, `password`, `prix_visite`, `localisation`) VALUES
@@ -90,7 +122,7 @@ INSERT INTO `medecin` (`id_medecin`, `nom`, `prenom`, `email`, `tel`, `specialit
 -- --------------------------------------------------------
 
 --
--- Table structure for table `ordonnance`
+-- Structure de la table `ordonnance`
 --
 
 CREATE TABLE `ordonnance` (
@@ -100,7 +132,7 @@ CREATE TABLE `ordonnance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `ordonnance`
+-- Déchargement des données de la table `ordonnance`
 --
 
 INSERT INTO `ordonnance` (`id_ordonnance`, `listMed`, `dateOrd`) VALUES
@@ -109,7 +141,7 @@ INSERT INTO `ordonnance` (`id_ordonnance`, `listMed`, `dateOrd`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `patient`
+-- Structure de la table `patient`
 --
 
 CREATE TABLE `patient` (
@@ -126,7 +158,7 @@ CREATE TABLE `patient` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `patient`
+-- Déchargement des données de la table `patient`
 --
 
 INSERT INTO `patient` (`id_patient`, `num_tel`, `nom`, `prenom`, `email`, `date_naissance`, `genre`, `taille`, `poids`, `password`) VALUES
@@ -137,12 +169,13 @@ INSERT INTO `patient` (`id_patient`, `num_tel`, `nom`, `prenom`, `email`, `date_
 (10, 56894841, 'halima', 'rafrafi', 'halima@gmail.com', '2007-10-16', 'femme', 164, 75.56, '$2b$10$JY18X1o.FeMPjxqcJiru../8T8f2hEVrJG2xrUmYtJKoZROsAkPn.'),
 (19, 14527895, 'ahmed', 'affouri', 'pcfamille2020@gmail.com', '2011-02-02', 'homme', 150, 40, '$2b$10$5KUHaaEvB2O3NddUbTORV.pnMjAYOXvQAzWr7x1V9kYDYrswwsdC.'),
 (23, 92057010, 'Amine', 'Rafrafi', 'rafrafiamine2004@gmail.com', '2004-08-17', 'homme', 180, 90, '$2b$10$vpauUgsll8Op.IznIuY/HezUeKZBQN4A4Dj54BdYskybWJfoVZ73K'),
-(24, 11445566, 'rawen', 'bensaleh', 'rawen@test.com', '2012-03-27', 'femme', 130, 45, '$2b$10$hhnMV152Ki4t5CmvpQT85exvj/J9zD3HXkwOpF38BWxmpWhlhazfm');
+(24, 11445566, 'rawena', 'bensaleh', 'rawen@test.com', '2013-02-27', 'femme', 130, 45, '$2b$10$hhnMV152Ki4t5CmvpQT85exvj/J9zD3HXkwOpF38BWxmpWhlhazfm'),
+(25, 55448896, 'amine', 'rafrafi', 'test@gmail.com', '2009-06-27', 'homme', 0, 0, '$2b$10$aftZPZbHOZhopxIPtEjXF.VKqKwPasrknDLW1bL1jLuIBk5anhHOW');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rapport`
+-- Structure de la table `rapport`
 --
 
 CREATE TABLE `rapport` (
@@ -154,7 +187,7 @@ CREATE TABLE `rapport` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `rapport`
+-- Déchargement des données de la table `rapport`
 --
 
 INSERT INTO `rapport` (`id_rapport`, `date_rapport`, `description`, `id_RDV`, `id_ordonnance`) VALUES
@@ -163,7 +196,7 @@ INSERT INTO `rapport` (`id_rapport`, `date_rapport`, `description`, `id_RDV`, `i
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rdv`
+-- Structure de la table `rdv`
 --
 
 CREATE TABLE `rdv` (
@@ -176,14 +209,14 @@ CREATE TABLE `rdv` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `rdv`
+-- Déchargement des données de la table `rdv`
 --
 
 INSERT INTO `rdv` (`id_RDV`, `date_RDV`, `id_patient`, `id_medecin`, `description`, `heure_debut`) VALUES
-(13, '2025-05-03', 24, 1, NULL, '13:00:00');
+(32, '2025-04-22', 25, 1, NULL, '09:30:00');
 
 --
--- Triggers `rdv`
+-- Déclencheurs `rdv`
 --
 DELIMITER $$
 CREATE TRIGGER `after_rdv_insert` AFTER INSERT ON `rdv` FOR EACH ROW BEGIN
@@ -194,24 +227,31 @@ $$
 DELIMITER ;
 
 --
--- Indexes for dumped tables
+-- Index pour les tables déchargées
 --
 
 --
--- Indexes for table `admins`
+-- Index pour la table `admins`
 --
 ALTER TABLE `admins`
   ADD PRIMARY KEY (`idadmin`);
 
 --
--- Indexes for table `emploi_du_temps`
+-- Index pour la table `doctor_schedule`
+--
+ALTER TABLE `doctor_schedule`
+  ADD PRIMARY KEY (`id_schedule`),
+  ADD KEY `id_medecin` (`id_medecin`);
+
+--
+-- Index pour la table `emploi_du_temps`
 --
 ALTER TABLE `emploi_du_temps`
   ADD PRIMARY KEY (`id_medecin`,`id_RDV`),
   ADD KEY `id_RDV` (`id_RDV`);
 
 --
--- Indexes for table `medecin`
+-- Index pour la table `medecin`
 --
 ALTER TABLE `medecin`
   ADD PRIMARY KEY (`id_medecin`),
@@ -219,13 +259,13 @@ ALTER TABLE `medecin`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Indexes for table `ordonnance`
+-- Index pour la table `ordonnance`
 --
 ALTER TABLE `ordonnance`
   ADD PRIMARY KEY (`id_ordonnance`) USING BTREE;
 
 --
--- Indexes for table `patient`
+-- Index pour la table `patient`
 --
 ALTER TABLE `patient`
   ADD PRIMARY KEY (`id_patient`),
@@ -233,7 +273,7 @@ ALTER TABLE `patient`
   ADD UNIQUE KEY `num_tel` (`num_tel`);
 
 --
--- Indexes for table `rapport`
+-- Index pour la table `rapport`
 --
 ALTER TABLE `rapport`
   ADD PRIMARY KEY (`id_rapport`,`id_RDV`),
@@ -241,7 +281,7 @@ ALTER TABLE `rapport`
   ADD KEY `id_ordonnance` (`id_ordonnance`);
 
 --
--- Indexes for table `rdv`
+-- Index pour la table `rdv`
 --
 ALTER TABLE `rdv`
   ADD PRIMARY KEY (`date_RDV`,`id_patient`,`id_medecin`),
@@ -250,64 +290,76 @@ ALTER TABLE `rdv`
   ADD KEY `id_medecin` (`id_medecin`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT pour les tables déchargées
 --
 
 --
--- AUTO_INCREMENT for table `admins`
+-- AUTO_INCREMENT pour la table `admins`
 --
 ALTER TABLE `admins`
   MODIFY `idadmin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `medecin`
+-- AUTO_INCREMENT pour la table `doctor_schedule`
+--
+ALTER TABLE `doctor_schedule`
+  MODIFY `id_schedule` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- AUTO_INCREMENT pour la table `medecin`
 --
 ALTER TABLE `medecin`
   MODIFY `id_medecin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `ordonnance`
+-- AUTO_INCREMENT pour la table `ordonnance`
 --
 ALTER TABLE `ordonnance`
   MODIFY `id_ordonnance` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `patient`
+-- AUTO_INCREMENT pour la table `patient`
 --
 ALTER TABLE `patient`
-  MODIFY `id_patient` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id_patient` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
--- AUTO_INCREMENT for table `rapport`
+-- AUTO_INCREMENT pour la table `rapport`
 --
 ALTER TABLE `rapport`
   MODIFY `id_rapport` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `rdv`
+-- AUTO_INCREMENT pour la table `rdv`
 --
 ALTER TABLE `rdv`
-  MODIFY `id_RDV` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id_RDV` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
--- Constraints for dumped tables
+-- Contraintes pour les tables déchargées
 --
 
 --
--- Constraints for table `emploi_du_temps`
+-- Contraintes pour la table `doctor_schedule`
+--
+ALTER TABLE `doctor_schedule`
+  ADD CONSTRAINT `doctor_schedule_ibfk_1` FOREIGN KEY (`id_medecin`) REFERENCES `medecin` (`id_medecin`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `emploi_du_temps`
 --
 ALTER TABLE `emploi_du_temps`
   ADD CONSTRAINT `emploi_du_temps_ibfk_1` FOREIGN KEY (`id_medecin`) REFERENCES `medecin` (`id_medecin`) ON DELETE CASCADE,
   ADD CONSTRAINT `emploi_du_temps_ibfk_2` FOREIGN KEY (`id_RDV`) REFERENCES `rdv` (`id_RDV`) ON DELETE CASCADE;
 
 --
--- Constraints for table `rapport`
+-- Contraintes pour la table `rapport`
 --
 ALTER TABLE `rapport`
   ADD CONSTRAINT `rapport_ibfk_1` FOREIGN KEY (`id_ordonnance`) REFERENCES `ordonnance` (`id_ordonnance`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `rdv`
+-- Contraintes pour la table `rdv`
 --
 ALTER TABLE `rdv`
   ADD CONSTRAINT `rdv_ibfk_1` FOREIGN KEY (`id_patient`) REFERENCES `patient` (`id_patient`) ON DELETE CASCADE ON UPDATE CASCADE,
