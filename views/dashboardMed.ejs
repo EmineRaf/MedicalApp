@@ -328,21 +328,21 @@
             <div class="user-avatar">
                 <%= user.name.charAt(0).toUpperCase() %>
             </div>
-            <span>Bonjour, <%= user.name %></span>
+            <span>Bonjour,Dr.<%= user.name %></span>
         </div>
         
         <ul class="nav-links">
             <li><a href="/edit/<%= user.id %>"><i class="fas fa-user-edit"></i> Mon profil</a></li>
-            <li><a href="/appointments"><i class="fas fa-calendar-check"></i> Mes rendez-vous</a></li>
-            <li><a href="/allMedecins"><i class="fas fa-user-md"></i> Médecins</a></li>
-            <li><a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            <li><a href="/calender"><i class="fas fa-calendar-check"></i> Mon calendrier</a></li>
+            <!--<li><a href="/allMedecins"><i class="fas fa-user-md"></i> Médecins</a></li>-->
+            <li><a href="/logoutMed" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
         </ul>
     </nav>
 
     <main>
         <div class="dashboard-header">
             <h1>Tableau de bord</h1>
-            <p>Gérez vos informations médicales et vos rendez-vous en un seul endroit</p>
+            <p>Gérez vos informations et vos rendez-vous en un seul endroit</p>
         </div>
         
         <div class="dashboard-grid">
@@ -351,7 +351,7 @@
                     <i class="fas fa-user-circle"></i>
                 </div>
                 <h3 class="card-title">Mon Profil</h3>
-                <p class="card-description">Consultez et modifiez vos informations personnelles et vos données médicales</p>
+                <p class="card-description">Consultez et modifiez vos informations personnelles et vos données </p>
                 <a href="/edit/<%= user.id %>" class="card-btn">
                     <i class="fas fa-edit"></i> Modifier
                 </a>
@@ -359,22 +359,22 @@
             
             <div class="dashboard-card">
                 <div class="card-icon">
-                    <i class="fas fa-calendar-alt"></i>
+                    <i class="fa-solid fa-bed-pulse"></i>
                 </div>
-                <h3 class="card-title">Mes Rendez-vous</h3>
-                <p class="card-description">Visualisez et gérez vos prochains rendez-vous médicaux</p>
-                <a href="/appointments" class="card-btn">
+                <h3 class="card-title">Patient prise en charge</h3>
+                <p class="card-description">Visualisez et contacter votre patients pris en charge </p>
+                <a href="/listePatients" class="card-btn">
                     <i class="fas fa-eye"></i> Voir
                 </a>
             </div>
             
             <div class="dashboard-card">
                 <div class="card-icon">
-                    <i class="fas fa-user-md"></i>
+                    <i class="fa-solid fa-hospital-user"></i>
                 </div>
-                <h3 class="card-title">Médecins</h3>
-                <p class="card-description">Trouvez et prenez rendez-vous avec nos spécialistes</p>
-                <a href="/allMedecins" class="card-btn">
+                <h3 class="card-title">Patient en attend</h3>
+                <p class="card-description">Confirmer et visualiser les profils des patients</p>
+                <a href="/" class="card-btn">
                     <i class="fas fa-search"></i> Rechercher
                 </a>
             </div>
@@ -389,7 +389,7 @@
                 <a href="#"><i class="fab fa-instagram"></i></a>
                 <a href="#"><i class="fab fa-linkedin-in"></i></a>
             </div>
-            <p class="copyright">© 2025 HealthConnect. Tous droits réservés.</p>
+            <p class="copyright">©️ 2025 HealthConnect. Tous droits réservés.</p>
         </div>
     </footer>
 </body>

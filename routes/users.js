@@ -34,6 +34,13 @@ function isAuthenticatedAdmin(req, res, next) {
     res.redirect("/adminLogin");
   }
 }
+function isAuthenticatedMed(req, res, next) {
+  if (req.session.med) {
+    next();
+  } else {
+    res.redirect("/signinMed");
+  }
+}
 
 // Admin Login
 router.get("/adminLogin", (req, res) => {
@@ -100,20 +107,29 @@ router.get("/dashboardAdmin", isAuthenticatedAdmin, (req, res) => {
           error: "Erreur lors de la récupération des patients"
         });
       }
+      db.query("SELECT count(id_patient) as countPat FROM patient", (err, ress) => {
+        if (err) {
+          console.error("Erreur lors de la récupération des patients:", err);
+          return res.render("dashboardAdmin", { 
+            admin: req.session.admin,
+          });
+        }
       
       res.render("dashboardAdmin", {
         admin: req.session.admin,
         listeMed: medecins,
         listePatients: patients,
+        counting:ress,
         error: null
       });
     });
   });
 });
+});
 
 // Patient Signup
 router.get("/signup", (req, res) => {
-  res.render("signup", { error: null, formData: null });
+  res.render("signup", { error: null, formData: {} });
 });
 
 router.post("/signup", async (req, res) => {
@@ -192,7 +208,6 @@ router.post("/signup", async (req, res) => {
 router.get("/signin", (req, res) => {
   res.render("signin", { error: null, email: "" });
 });
-
 router.post("/signin", (req, res) => {
   const { email, password } = req.body;
   const sql = "SELECT * FROM patient WHERE email = ?";
@@ -218,7 +233,7 @@ router.post("/signin", (req, res) => {
     if (isMatch) {
       req.session.user = {
         id: user.id_patient,
-        name: user.nom,
+        name: user.prenom,
         email: user.email,
       };
       
@@ -234,6 +249,77 @@ router.post("/signin", (req, res) => {
   });
 });
 
+
+
+router.get("/signinMed", (req, res) => {
+  res.render("signinMed", { error: null, email: "" });
+});
+
+router.post("/signinMed", (req, res) => {
+  const { email, password } = req.body;
+  const sql = "SELECT * FROM medecin WHERE email = ?";
+
+  db.query(sql, [email], async (err, results) => {
+    if (err) {
+      return res.render("signinMed", { 
+        error: "Erreur de la base de données.", 
+        email 
+      });
+    }
+
+    if (results.length === 0) {
+      return res.render("signinMed", { 
+        error: "❌ Utilisateur non trouvé !", 
+        email 
+      });
+    }
+
+    const user = results[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (isMatch) {
+      req.session.med = {
+        id: user.id_medecin,
+        name: user.nom,
+        email: user.email,
+      };
+      
+      req.session.save(() => {
+        res.redirect("/dashboardMed");
+      });
+    } else {
+      res.render("signinMed", { 
+        error: "Mot de passe incorrect", 
+        email 
+      });
+    }
+  });
+});
+
+router.get("/listePatients", isAuthenticatedMed, (req, res) => {
+  const medID = req.session.med.id;
+
+  db.query("SELECT nom,prenom,DATE_FORMAT(date_RDV, '%d %M %Y') AS date_RDV,heure_debut FROM patient p,rdv r where r.id_medecin=? and r.id_patient=p.id_patient",[medID], (err, listePatients) => {
+    if (err) {
+      return res.render("listePatients", { 
+        listePatients: [],
+        user: req.session.med,
+        error: "Erreur lors de la récupération des patients"
+      });
+    }
+    res.render('listePatients', { 
+      listePatients: listePatients,
+      user: req.session.med,
+      error: null
+    });
+  });
+});
+router.get("/infoPatient", isAuthenticatedMed, (req, res) => {
+  res.render("infoPatient", {
+    user: req.session.med,
+    error: null
+  });
+});
 // Logout
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
@@ -249,6 +335,12 @@ router.get("/logoutAdmin", (req, res) => {
   });
 });
 
+router.get("/logoutMed", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) console.error(err);
+    res.redirect("/signinMed"); 
+  });
+});
 // Edit Patient Profile
 router.get("/edit/:id", isAuthenticated, (req, res) => {
   const { id } = req.params;
@@ -288,6 +380,12 @@ router.post("/update/:id", isAuthenticated, async (req, res) => {
 router.get("/dashboard", isAuthenticated, (req, res) => {
   res.render("dashboard", {
     user: req.session.user,
+    error: null
+  });
+});
+router.get("/dashboardMed", isAuthenticatedMed, (req, res) => {
+  res.render("dashboardMed", {
+    user: req.session.med,
     error: null
   });
 });
@@ -357,6 +455,11 @@ router.get("/allMedecins", isAuthenticated, (req, res) => {
     });
   });
 });
+router.get("/listePatients",isAuthenticatedMed,(req,res)=>{
+  const userId = req.session.user.id;
+
+
+})
 
 // Utility functions
 const getDayOfWeek = (date) => {
@@ -399,17 +502,6 @@ router.get("/prendreRdv/:id", isAuthenticated, async (req, res) => {
       });
     });
 
-
-    if (schedules.length === 0) {
-      return res.render("PageRDV", {
-        med: medecin,
-        selectedDate,
-        availableSlots: [],
-        noSchedule: true,
-        error: null
-      });
-    }
-
     // 3. Récupération des RDV existants
     const existingAppointments = await new Promise((resolve, reject) => {
       db.query(`
@@ -423,28 +515,28 @@ router.get("/prendreRdv/:id", isAuthenticated, async (req, res) => {
       });
     });
 
-
     // 4. Génération des créneaux disponibles
     let availableSlots = [];
     
-    for (const schedule of schedules) {
-      const slots = generateTimeSlots(
-        schedule.start_time,
-        schedule.end_time,
-        schedule.slot_duration,
-        existingAppointments,
-        selectedDate
-      );
-      availableSlots = [...availableSlots, ...slots];
+    if (schedules.length > 0) {
+      for (const schedule of schedules) {
+        const slots = generateTimeSlots(
+          schedule.start_time,
+          schedule.end_time,
+          schedule.slot_duration,
+          existingAppointments,
+          selectedDate
+        );
+        availableSlots = [...availableSlots, ...slots];
+      }
     }
-
 
     res.render("PageRDV", {
       med: medecin,
       selectedDate,
       availableSlots,
-      noSchedule: availableSlots.length === 0,
-      error: null
+      noSchedule: schedules.length === 0, // true si aucun planning n'est défini pour ce jour
+      error: schedules.length === 0 ? "Le médecin ne travaille pas ce jour" : null
     });
 
   } catch (err) {
@@ -669,6 +761,9 @@ router.post("/AjoutMedecin", isAuthenticatedAdmin, async (req, res) => {
       success: null
     });
   }
+});
+router.get("/calender",(req,res)=> {
+  res.render("calendrier");
 });
 
 module.exports = router;

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="listepatients.css">
+    <title>Liste Des Patients</title>
+</head>
+<body>
+    <div class="liste">
+        <div>
+            <a href="/dashboardMed">
+        <button class="acceuilButton">Retour à l'acceuil</button>
+    </a>
+    </div>
+        <h1>Liste Des Patients</h1>
+
+
+        <div class="barre-recherche">
+            <label for="barre-recherche">Rechercher :</label>
+            <input id="barre-recherche" type="text" placeholder="Rechercher un patient.."/>
+        </div>
+
+        <table id="tableauPatient">
+            <% if (listePatients && listePatients.length > 0) { %>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nom</th>
+                      <th>Prenom</th>
+                      <th>DateRDV</th>
+                      <th>Heure</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% listePatients.forEach(patient => { %>
+                      <tr>
+                        <td><%= patient.nom %></td>
+                        <td><%= patient.prenom %></td>
+                        <td><%= patient.date_RDV %></td>
+                        <td><%= patient.heure_debut %></td>
+                        <td><a href="/infoPatient"><button class="informations">Voir Informations</button></a></td>
+
+                        <td>
+                      </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+                <% } else { %>
+                    <p>Aucun rendez-vous à venir.</p>
+                  <% } %>
+                </div>
+    <script>
+        document.addEventListener("DOMContentLoaded",function(){
+            const champRecherche= document.getElementById("barre-recherche");
+            const lignes= document.querySelectorAll(".patient");
+            champRecherche.addEventListener("input",function(){
+                const texteRecherche= champRecherche.value.toLowerCase();
+
+                lignes.forEach(ligne=> {
+                    const nomPatient= ligne.querySelector(".nom").textContent.toLowerCase();
+                    const prenomPatient= ligne.querySelector(".prenom").textContent.toLowerCase();
+                    if (nomPatient.includes(texteRecherche) || prenomPatient.includes(texteRecherche)) {
+                        ligne.style.display="";
+                    } else {
+                        ligne.style.display="none";
+                    }
+                });
+            });
+        });
+
+    </script>
+</body>
+</html>
+
+
+
+

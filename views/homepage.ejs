@@ -3,13 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/homepage.css"/>
     <title>HomePage</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <H1>Welcome to our SITE</H1>
-    <a href="/signup"> Signup</a>
-    <a href="/signin">login </a>
-    <a href="/adminLogin">login Admin</a>
+    <div class="background"></div>
+    <nav>
+        <div class="logo">
+            <i class="fas fa-heartbeat"></i>
+            <span>HealthConnect</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="/signin" class="btn">Login</a></li>
+            <li><a href="/adminLogin" class="btn">login Admin</a></li>
+            <li><a href="/signinMed" class="btn">login Medecins</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="hero">
+            <h1 class="animated">Votre santé, notre priorité</h1>
+            <p class="tagline animated delay-1">Nous vous mettons en relation avec les meilleurs professionnels de santé pour des soins médicaux personnalisés, 
+                à tout moment et en tout lieu.</p>
+            <div class="cta-buttons animated delay-2">
+                <a href="/signup" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </a>
+                <a href="/signin" class="btn btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <footer >
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+            <p class="copyright">© 2023 HealthConnect. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>

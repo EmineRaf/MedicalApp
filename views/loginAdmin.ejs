@@ -12,7 +12,7 @@
         <h2 class="text-2xl font-bold text-center mb-6">Connexion Admin</h2>
         
         <form id="adminLoginForm" method="post" action="/adminLogin">
-            <input type="text" id="email" placeholder="Email" class="border p-2 w-full mb-3 rounded" required name="username">
+            <input type="text" id="email" placeholder="Email" class="border p-2 w-full mb-3 rounded" required name="username" value="<%= username %>">
             <input type="password" id="password" placeholder="Mot de passe" class="border p-2 w-full mb-3 rounded" required name="password">
             <button type="submit" class="bg-blue-600 text-white p-2 rounded w-full">Se connecter</button>
         </form>
@@ -23,7 +23,7 @@
             </div>
           <% } %>
         <div class="mt-4 text-center">
-            <a href="/homepage" class="text-blue-500">Retour à l'accueil</a>
+            <a href="/" class="text-blue-500">Retour à l'accueil</a>
         </div>
     </div>
 

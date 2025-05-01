@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="pagepatient.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiche detaillée du patient</title>
+</head>
+<body>
+    <div class="container">
+        <a href="/dashboardMed">
+            <button class="acceuilButton">Retour à l'acceuil</button>
+        </a>
+        
+        <h1>Fiche Détaillee du Patient</h1>
+        
+        <div class="infos-patient">
+            <h2>Informations du Patient</h2>
+            <p><strong>Nom : </strong>Tanekti</p>
+            <p><strong>Prénom : </strong>Fatma</p>
+            <p><strong>Age : </strong>22</p>
+            <p><strong>Date de naissance : </strong>19/05/2003</p>
+            <p><strong>Numéro de telephone : </strong>+216 90 067 090</p>
+        </div>
+
+        <div class="historiqueMedical-container">
+        <h3>Historique Medical</h3>
+        <p>Antécédents médicaux : ..</p>
+        <p>Allergies : ..</p>
+        <p>Vaccinations : ....</p>
+    </div>
+
+    <div class="ordonnance-container">
+        <h3>Ordonnance</h3>
+        <input type="file" id="ajouter-ordonnance" accept=".pdf"/>
+        <button onclick="ajouterOrdonnance()">Ajouter Ordonnance (pdf)</button>
+    </div>
+
+    <div class="notes-container">
+        <h3>Notes</h3>
+        <textarea id="ajouter-notes" placeholder="Ajouter une note"></textarea>
+        <button id="enregistrer-notes">Enregistrer la note</button>
+    </div>
+</div>
+    <script>
+        function ajouterOrdonnance() {
+            const fileInput= document.getElementById("ajouter-ordonnance");
+            const file= fileInput.files[0];
+            if (file){
+                console.log("Ordonnance ajoutée: ",file.name);
+
+            }else{
+                alert("Veuillez choisir un fichier PDF");
+            }
+        }
+
+        function ajouterNotes() {
+            const note= document.getElementById("ajouter-notes").value;
+            if (note){
+                console.log("Note ajoutée: ",note);
+            }else{
+                alert("Veuillez ajouter une note");
+            }
+        }
+    </script>
+</body>
+</html>

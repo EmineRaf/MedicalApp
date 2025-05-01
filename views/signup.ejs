@@ -1,40 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+ <!DOCTYPE html>
+ <html lang="fr">
+ <head>
+    <link rel="stylesheet" href="/signstyle.css">
     <meta charset="UTF-8">
-    <title>Sign up to "SITE"</title>
-    <link rel="stylesheet" href="/styles1.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up</title>
+    <!--<script src="sign.js"></script>-->
+ </head>
+ <body>
+    <body>
+        <!-- Section Formulaire -->
+        <section class="form-section">
+            <div class="form-container">
+                <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 15L30 40V85H70V40L50 15Z" fill="#2AA8FF" stroke="#1B3C74" stroke-width="4"/>
+                    <circle cx="50" cy="55" r="15" fill="#1B3C74"/>
+                    <path d="M40 30L60 30" stroke="#1B3C74" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+                
+                <h1>Inscription pour devenir membre</h1>
+                <p class="intro-text">Veuillez remplir ce formulaire avec les informations requises</p>
+                
+                <form id="signupForm" method="post" action="/signup">
+                        <div id="form-error" class="form-message error-text" style="display:none;"></div>
+                        <div id="form-success" class="form-message success-text" style="display:none;"></div>
 
-</head>
-<body>
-    <h1>Sign up to become a member</h1>
-    <p>Please fill out this form with the required information</p>
-    <div class="form-container">
-    <form method="post" action='/signup'>
-    <fieldset>
-        <label for="first-name">Enter Your First Name: <input id="first-name" name="nom" type="text" required /></label>
-        <label for="last-name">Enter Your Last Name: <input id="last-name" name="prenom" type="text" required /></label>
-        <label for="email">Enter Your Email: <input id="email" name="email" type="email" required /></label>
-        <label for="phone-number">Enter Your phone number: <input id="phone-number" name="tel" type="tel" required /></label>
-        <label for="date-of-birth">Enter your Date of Birth: <input id="date-of-birth" name="dateNaissance" type="date" required>
-        </label>
-            <label for="gender">Genre:</label>
-            <input type="radio" name="genre" value="homme" required /> Male
-            <input type="radio" name="genre" value="femme" required /> Female
-        <label for="Taille">Taille en Cm <input id="taille" name="taille" type="number" step="any" /></label>
-        <label for="Poids">Poids en Kg <input id="poids" name="poids" type="number" step="any" /></label>
-
-        <label for="password">Create a Password: <input id="password" name="password" type="password"  /></label>
-    </fieldset>
-
-    <input type="submit" value="Sign up" />
-    <% if (typeof error !== 'undefined') { %>
-        <div class="error-message">
-          <%= error %>
-        </div>
-      <% } %>
-    </form>
-    <a href="/">Back</a>
-    </div>
-</body>
-</html>
+                    <div class="form-row">
+                        
+                        <div class="form-group">
+                            <label for="first-name">Prénom</label>
+                            <input type="text" id="first-name" name="prenom" required value="<%=formData.prenom || '' %>">
+                            <div class="error-text" id="first-name-error"></div> 
+                          </div>
+                          
+                        <div class="form-group">
+                            <label for="last-name">Nom</label>
+                            <input type="text" id="last-name" name="nom" value="<%= formData.nom || '' %>"
+                            required>
+                            <div class="error-text" id="last-name-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" value="<%= formData.email || '' %>"
+                            required>
+                            <div class="error-text" id="email-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone-number">Téléphone</label>
+                            <input type="tel" id="phone-number" name="tel" value="<%= formData.tel || '' %>"
+                            required>
+                            <div class="error-text" id="phone-number-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date-of-birth">Date de naissance</label>
+                        <input type="date" id="date-of-birth" name="dateNaissance" value="<%= formData.dateNaissance || '' %>"
+                        required>
+                        <div class="error-text" id="date-of-birth-error"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Genre</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="male" name="genre" value="homme" required>
+                                <label for="male">Homme</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="female" name="genre" value="femme" required>
+                                <label for="female">Femme</label>
+                            </div>
+                            <div id="gender-error" class="error-text" style="display:none;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="taille">Taille (cm)</label>
+                            <input type="number" step="any" id="taille" name="taille" value="<%= formData.taille || '' %>"
+                            >
+                            <div class="error-text" id="taille-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="poids">Poids (kg)</label>
+                            <input type="number" step="any" id="poids" name="poids" value="<%= formData.poids || '' %>"
+                            >
+                            <div class="error-text" id="poids-error"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Créer un mot de passe</label>
+                        <input type="password" id="password" name="password">
+                        <div class="error-text" id="password-error"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit" id="submit-btn">S'inscrire</button>
+                    <a href="/" class="btn-back">Retour</a>
+                    <% if (typeof error !== 'undefined') { %>
+                        <div class="error-message">
+                          <%= error %>
+                        </div>
+                      <% } %>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Section Image -->
+        <section class="image-section">
+            <div class="image-content">
+                <h2>Votre santé, notre priorité</h2>
+                <p>Rejoignez notre communauté médicale et bénéficiez d'un suivi personnalisé par nos professionnels de santé.</p>
+            </div>
+        </section>
+    </body>
+    </html>

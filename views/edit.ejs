@@ -4,184 +4,294 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modifier un utilisateur</title>
-    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2AA8FF;
+            --primary-hover: #1E90FF;
+            --secondary-color: #f8f9fa;
+            --text-color: #333;
+            --border-radius: 10px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("doctors.png");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(8px) brightness(0.9);
+            z-index: -2;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(42, 168, 255, 0.1);
+            z-index: -1;
+        }
+
+        .container-wrapper {
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: #f8fafc;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(42, 168, 255, 0.2);
+            background-color: white;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 168, 255, 0.3);
+        }
+
+        .acceuilButton {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .acceuilButton:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .acceuilButton i {
+            margin-right: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Styles pour les icônes dans les champs */
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .input-icon input {
+            padding-left: 40px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .profile-card {
+                padding: 20px;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <a href="/dashboard">
-    <button class="acceuilButton">Retour à l'acceuil</button>
-  </a>    
-    <h2>Modifier l'utilisateur</h2>
-    <form action="/update/<%= user.id_patient%>" method="POST">
-        <fieldset>
-            <label for="first-name">First Name: <input id="first-name" name="nom" type="text" value="<%= user.nom %>" /></label><br>
-            <label for="last-name">Last Name: <input id="last-name" name="prenom" type="text" value="<%= user.prenom %>"  /></label><br>
-            <label for="email">Email: <input id="email" name="email" type="email" value="<%= user.email %>" /></label><br>
-            <label for="phone-number">phone number: <input id="phone-number" name="tel" type="tel"  value="<%= user.num_tel %>"/></label><br>
-            <label for="date-of-birth">Date of Birth: <input id="date-of-birth" name="dateNaissance" type="date" value="<%= user.date_naissance %>" required><br>
-            <label for="Taille">Taille en Cm <input id="taille" name="taille" type="number" step="any"value="<%= user.taille %>" /></label><br>
-            <label for="Poids">Poids en Kg <input id="poids" name="poids" type="number" step="any"value="<%= user.poids %>" /></label><br>
-                <input type="submit" value="Modifier">
-        </fieldset>
-    </form>
-    <style>
-      /* Réinitialisation et styles de base */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    <div class="container-wrapper">
+        <a href="/dashboard" class="text-decoration-none">
+            <button class="acceuilButton">
+                <i class="fas fa-arrow-left"></i> Retour à l'accueil
+            </button>
+        </a>
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f8ff;
-    color: #333;
-    line-height: 1.6;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    position: relative;
-}
+        <div class="profile-card">
+            <h2><i class="fas fa-user-edit me-2"></i>Modifier l'utilisateur</h2>
+            
+            <form action="/update/<%= user.id_patient%>" method="POST">
+                <div class="form-group">
+                    <label for="first-name">Prénom</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user"></i>
+                        <input class="form-control" id="first-name" name="nom" type="text" value="<%= user.nom %>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="last-name">Nom</label>
+                    <div class="input-icon">
+                        <i class="fas fa-user-tag"></i>
+                        <input class="form-control" id="last-name" name="prenom" type="text" value="<%= user.prenom %>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <div class="input-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input class="form-control" id="email" name="email" type="email" value="<%= user.email %>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone-number">Téléphone</label>
+                    <div class="input-icon">
+                        <i class="fas fa-phone"></i>
+                        <input class="form-control" id="phone-number" name="tel" type="tel" value="<%= user.num_tel %>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date-of-birth">Date de naissance</label>
+                    <div class="input-icon">
+                        <i class="fas fa-birthday-cake"></i>
+                        <input class="form-control" id="date-of-birth" name="dateNaissance" type="date" 
+                               value="<%= new Date(user.date_naissance).toISOString().split('T')[0] %>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="taille">Taille (cm)</label>
+                    <div class="input-icon">
+                        <i class="fas fa-ruler-vertical"></i>
+                        <input class="form-control" id="taille" name="taille" type="number" step="0.1" value="<%= user.taille %>" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="poids">Poids (kg)</label>
+                    <div class="input-icon">
+                        <i class="fas fa-weight"></i>
+                        <input class="form-control" id="poids" name="poids" type="number" step="0.1" value="<%= user.poids %>" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                </button>
+            </form>
+        </div>
+    </div>
 
-/* Arrière-plan flou avec overlay bleu */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url("doctors.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    filter: blur(8px);
-    z-index: -2;
-}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animation pour les champs du formulaire
+        document.querySelectorAll('.form-group').forEach((group, index) => {
+            group.style.opacity = '0';
+            group.style.transform = 'translateY(20px)';
+            group.style.animation = `fadeInUp 0.5s ease-out forwards ${index * 0.1}s`;
+        });
 
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 105, 255, 0.2);
-    z-index: -1;
-}
-
-/* Titre principal */
-h2 {
-    color: #0066ff;
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 2rem;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* Formulaire de modification */
-form {
-    background-color: white;
-    border-radius: 10px;
-    padding: 2rem;
-    box-shadow: 0 8px 20px rgba(0, 68, 204, 0.15);
-    border: 1px solid #e0e0e0;
-    width: 100%;
-    max-width: 500px;
-}
-
-fieldset {
-    border: none;
-    padding: 0;
-}
-
-label {
-    display: block;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-    color: #555;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-input[type="number"] {
-    width: 100%;
-    padding: 0.8rem;
-    margin-top: 0.5rem;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: all 0.3s;
-}
-
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="tel"]:focus,
-input[type="date"]:focus,
-input[type="number"]:focus {
-    border-color: #0066ff;
-    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
-    outline: none;
-}
-
-input[type="submit"] {
-    background: linear-gradient(135deg, #0066ff, #0044cc);
-    color: white;
-    border: none;
-    padding: 1rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.3s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 1rem;
-}
-
-input[type="submit"]:hover {
-    background: linear-gradient(135deg, #0044cc, #0066ff);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 68, 204, 0.3);
-}
-
-/* Responsive design */
-@media (max-width: 600px) {
-    body {
-        padding: 15px;
-    }
-    
-    h2 {
-        font-size: 1.5rem;
-    }
-    
-    form {
-        padding: 1.5rem;
-    }
-}
-.acceuilButton{
-    display: inline-block;
-    background-color: #2AA8FF;
-    color: aliceblue;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 20px;
-    
-
-}
-
-.acceuilButton:hover{
-    background-color: #358ece;
-}
-
-    </style>
+        // Ajout de la keyframe dynamiquement
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

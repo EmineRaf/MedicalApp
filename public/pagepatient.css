@@ -1,0 +1,139 @@
+body{
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    padding: 0;
+    color: #28539e;
+    background-size: cover;
+    background-position: center;
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+body::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-image: url("doctors.png");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    filter: blur(20px);
+    z-index: -1;
+}
+
+.acceuilButton{
+    display: inline-block;
+    background-color: #2AA8FF;
+    color: aliceblue;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    text-align: center;
+    z-index: 1;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.acceuilButton:hover{
+    background-color: #358ece;
+}
+
+h1{
+    text-align: center;
+    color: #1B3C74;
+    font-size: 2rem;
+    margin-bottom: 40px;
+    z-index: 1;
+}
+
+.container{
+    margin-top: 100px;
+    width: 90%;
+    max-width: 1000px;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 0px 0px 15px #000;
+    text-align: left;
+    z-index: 0;
+}
+
+h2{
+    color: #1B3C74;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.infos-patient p{
+    font-size: 1rem;
+    margin: 5px 0;
+}
+
+.historiqueMedical-container, .ordonnance-container, .notes-container{
+    width: 90%;
+    padding: 0.8rem;
+    background-color: white;
+    margin-top: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px #000;
+}
+
+.historiqueMedical-container h3, .ordonnance-container h3, .notes-container h3{
+    color: #1B3C74;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+input[type="file"]{
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+textarea{
+    width: 90%;
+    padding: 5px;
+    border: 1px solid #2AA8FF;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+button {
+    background-color: #358ece;
+    color: aliceblue;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #b0ccd4;
+}
+
+#enregistrer-notes {
+    margin-top: 10px;
+    display: inline-block;
+}
+
+#ajouter-ordonnance {
+    display: inline-block;
+    margin-top: 10px;
+    margin-right: 10px;
+}
