@@ -409,7 +409,7 @@ router.get("/appointments", isAuthenticated, (req, res) => {
   });
 });
 
-router.get("/appointments/cancel/:id", isAuthenticated, (req, res) => {
+router.post("/appointments/cancel/:id", isAuthenticated, (req, res) => {
   const userId = req.session.user.id;
   const appointmentId = req.params.id;
 
